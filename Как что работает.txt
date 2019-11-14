@@ -1,0 +1,11 @@
+НАЧАЛЬНЫЕ ИЗМЕНЕНИЯ НЕПОСРЕДСТВЕННО ПОСЛЕ УСТАНОВКИ:
+## в  ~/new5/baselines/baselines/run.py    добавить import pybulletgym
+## туда же добавить           env.render()    перед    "model = learn(    <...>"
+## в  runner.py   добавить   env.render()    после    "self.obs[:], rewards, self.dones, infos = self.env.step(actions)"
+
+ОСТАЛЬНОЕ:
+Файлы типа ant.xml  лежат в   /home/ai/new5/pybullet-gym/pybulletgym/envs/assets/mjcf/ 
+env.step() определено в   /home/ai/new5/pybullet-gym/pybulletgym/envs/roboschool/envs/locomotion/walker_base_env.py
+
+Детерминизм получается, если в walker_base.py убрать random в robot_specific_reset  (сам pybullet claims to be 100% deterministic)
+Многоагентность получается вставкой куска кода в runner.py
