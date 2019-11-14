@@ -1,6 +1,14 @@
 from pybulletgym.envs.roboschool.robots.robot_bases import XmlBasedRobot
 import numpy as np
+import sys
+import re
 
+def get_agent_number(args):
+    ans = 0 #by default
+    for elem in args:
+        if elem[:-1] == '--agent_number=':
+            ans = elem[-1]
+    return ans
 
 class WalkerBase(XmlBasedRobot):
     def __init__(self, power):
@@ -30,6 +38,7 @@ class WalkerBase(XmlBasedRobot):
             j.set_motor_torque(self.power * j.power_coef * float(np.clip(a[n], -1, +1)))
 
     def calc_state(self):
+        agent_number = get_agent_number(sys.argv)        
         j = np.array([j.current_relative_position() for j in self.ordered_joints], dtype=np.float32).flatten()
         # even elements [0::2] position, scaled to -1..+1 between limits
         # odd elements  [1::2] angular speed, scaled to show -1..+1
@@ -53,17 +62,14 @@ class WalkerBase(XmlBasedRobot):
         self.walk_target_dist = np.linalg.norm(
             [0 - self.body_xyz[1], 0 - self.body_xyz[0], 1e3 - self.body_xyz[2]])
         self.walk_target_dist = 1e3 - parts_xyz[2::3].max() + 1e3 - parts_xyz[2::3].mean()
-        if agent_number_global == 1:
-            self.walk_target_dist = 1e3 - parts_xyz[40]  + \
-               abs(body_pose.xyz()[1] - parts_xyz[40] - 0.4)**1.5 + abs(body_pose.xyz()[0] - parts_xyz[39])
-        if agent_number_global == 2:
-            self.walk_target_dist = 1e3 - parts_xyz[40]  + \
-               abs(body_pose.xyz()[1] - parts_xyz[40] - 0.4)**1.5 + abs(body_pose.xyz()[0] - parts_xyz[39])
-        #print(parts_xyz)
-        '''import time
-        import random
-        if random.randint(1,100) > 99:
-            time.sleep(10000)'''
+        if agent_number:
+            self.walk_target_dist = np.linalg.norm([self.parts['front_right_leg'].get_pose()[0],  self.parts['front_right_leg'].get_pose()[1]]) - \
+                np.linalg.norm([self.parts['front_right_leg2'].get_pose()[0],  self.parts['front_right_leg2'].get_pose()[1]]) + \
+                    (self.parts['front_right_leg2'].get_pose()[2] > 1) * (self.parts['front_right_leg2'].get_pose()[2] - 1)
+            if agent_number == 2:
+                self.walk_target_dist = 0 - self.walk_target_dist
+        #for key in self.parts.keys():
+        #    print(key, self.parts[key].get_pose())
         angle_to_target = self.walk_target_theta - yaw
 
         rot_speed = np.array(
