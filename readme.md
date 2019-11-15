@@ -36,7 +36,7 @@ python3.5 -m baselines.run --alg=ppo2 --env=AntPyBulletEnv-v0 --network=mlp --nu
 ```
 (2) Простенький CustomEnv (агент ходит вправо и влево по 10 состояниям) лежит в pybulletgym/envs/roboschool/robots/locomotors/
 ```
-ython3.5 -m baselines.run --alg=ppo2 --env-v0 --network=mlp --num_timesteps=2e7 --save_path=~/models/AntPyBulletEnv-v0_ppo2 --play --agent_number=0
+python3.5 -m baselines.run --alg=ppo2 --env=CustomEnv-v0 --network=mlp --num_timesteps=2e7 --save_path=~/models/AntPyBulletEnv-v0_ppo2 --play --agent_number=0
 ```
 
 **Особенности последней версии по сравнению с прошлой:**
