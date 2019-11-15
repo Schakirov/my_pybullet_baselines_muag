@@ -8,14 +8,14 @@ from collections import defaultdict
 import tensorflow as tf
 import numpy as np
 
-from baselines.common.vec_env import VecFrameStack, VecNormalize, VecEnv
+from baselines.common.vec_env import VecFrameStack, VecNormalize, VecEnv, DummyVecEnv
 from baselines.common.vec_env.vec_video_recorder import VecVideoRecorder
 from baselines.common.cmd_util import common_arg_parser, parse_unknown_args, make_vec_env, make_env
 from baselines.common.tf_util import get_session
 from baselines import logger
 from importlib import import_module
+from pybulletgym.envs.roboschool.robots.locomotors.CustomEnv import CustomEnv
 
-global agent_number_global
 
 try:
     from mpi4py import MPI
@@ -80,7 +80,7 @@ def train(args, extra_args):
     else:
         if alg_kwargs.get('network') is None:
             alg_kwargs['network'] = get_default_network(env_type)
-    
+
     print('Training {} on {}:{} with arguments \n{}'.format(args.alg, env_type, env_id, alg_kwargs))
     
     env.render()
@@ -97,6 +97,10 @@ def train(args, extra_args):
 
 
 def build_env(args):
+    '''
+    if args.env == 'CustomEnv':
+        env = DummyVecEnv([lambda: CustomEnv()])
+        return env'''
     ncpu = multiprocessing.cpu_count()
     if sys.platform == 'darwin': ncpu //= 2
     nenv = args.num_env or ncpu

@@ -28,16 +28,20 @@ python3.5 -m baselines.run --alg=ppo2 --env=HumanoidPyBulletEnv-v0 --network=mlp
 ```
 
 ## **Описание данной версии:**
-В первую очередь - это модифицированный файл runner.py, позволяющий запустить одновременно 2 агентов, за каждый отвечает отдельная нейросеть.
+(1) Возможность запустить одновременно 2 агентов, за каждый отвечает отдельная нейросеть.
 Просто запускаются из двух отдельных терминалов две версии программы, отличающиеся только параметром agent_number:
 ```
 python3.5 -m baselines.run --alg=ppo2 --env=AntPyBulletEnv-v0 --network=mlp --num_timesteps=2e7 --save_path=~/models/AntPyBulletEnv-v0_ppo2 --play --agent_number=1
 python3.5 -m baselines.run --alg=ppo2 --env=AntPyBulletEnv-v0 --network=mlp --num_timesteps=2e7 --save_path=~/models/AntPyBulletEnv-v0_ppo2 --play --agent_number=2
 ```
+(2) Простенький CustomEnv (агент ходит вправо и влево по 10 состояниям) лежит в pybulletgym/envs/roboschool/robots/locomotors/
+```
+ython3.5 -m baselines.run --alg=ppo2 --env-v0 --network=mlp --num_timesteps=2e7 --save_path=~/models/AntPyBulletEnv-v0_ppo2 --play --agent_number=0
+```
 
 **Особенности последней версии по сравнению с прошлой:**
-Функции для мультиагентности вынесены в отдельный файл muag.py, который импортируется.
+Простенький CustomEnv работает.
 
 **TODO:**
 (1) Хочется попробовать то же на HER (hindsight experience replay).<br/>
-(2) И еще пожалуй надо заканчивать эпизод, как только агент слишком далеко от (0, 0)
+В HER особенная структура возвращаемого obs:  это dictionary с ключами 'obs', 'desired' (goal) итп.

@@ -5,3 +5,4 @@ from pybulletgym.envs.roboschool.robots.locomotors.hopper import Hopper
 from pybulletgym.envs.roboschool.robots.locomotors.humanoid import Humanoid
 from pybulletgym.envs.roboschool.robots.locomotors.humanoid_flagrun import HumanoidFlagrun, HumanoidFlagrunHarder
 from pybulletgym.envs.roboschool.robots.locomotors.walker2d import Walker2D
+from pybulletgym.envs.roboschool.robots.locomotors.CustomEnv import CustomEnv

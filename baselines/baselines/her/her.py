@@ -136,7 +136,8 @@ def learn(*, network, env, total_timesteps,
             'https://github.com/openai/baselines/issues/314 for further details.')
         logger.warn('****************')
         logger.warn()
-
+    
+    print('params = ', params)
     dims = config.configure_dims(params)
     policy = config.configure_ddpg(dims=dims, params=params, clip_return=clip_return)
     if load_path is not None:

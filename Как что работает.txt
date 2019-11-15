@@ -9,3 +9,18 @@ env.step() определено в   /home/ai/new5/pybullet-gym/pybulletgym/envs
 
 Детерминизм получается, если в walker_base.py убрать random в robot_specific_reset  (сам pybullet claims to be 100% deterministic)
 Многоагентность получается вставкой куска кода в runner.py
+
+РЕГИСТРАЦИЯ НОВОГО ENVIRONMENT
+## взято из https://stable-baselines.readthedocs.io/en/master/guide/custom_env.html
+## а также из https://stackoverflow.com/questions/52727233/how-can-i-register-a-custom-environment-in-openais-gym
+(1) положить CustomEnv.py в  pybulletgym/envs/roboschool/robots/locomotors/
+(2) добавить в __init__.py в той же папке строчку:
+from pybulletgym.envs.roboschool.robots.locomotors.CustomEnv import CustomEnv
+(3) внутри pybulletgym/envs/__init__.py зарегистрировать свой енвайронмент строчками:
+register(
+	id='CustomEnv-v0',
+	entry_point='pybulletgym.envs.roboschool.robots.locomotors.CustomEnv:CustomEnv',
+	max_episode_steps=1000,
+	reward_threshold=2500.0
+	)
+

@@ -55,6 +55,12 @@ register(
 
 ## locomotors
 register(
+	id='CustomEnv-v0',
+	entry_point='pybulletgym.envs.roboschool.robots.locomotors.CustomEnv:CustomEnv',
+	max_episode_steps=1000,
+	reward_threshold=2500.0
+	)
+register(
 	id='Walker2DPyBulletEnv-v0',
 	entry_point='pybulletgym.envs.roboschool.envs.locomotion.walker2d_env:Walker2DBulletEnv',
 	max_episode_steps=1000,
