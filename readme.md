@@ -40,7 +40,12 @@ python3.5 -m baselines.run --alg=ppo2 --env=CustomEnv-v0 --network=mlp --num_tim
 ```
 
 **Особенности последней версии по сравнению с прошлой:**
-Простенький CustomEnv работает.
+Добавлен новый CustomEnv (старый перенесен в файл "CustomEnv-10states-simple.py")<br/>
+Конкретно эта версия запускалась командой:<br/>
+```
+python3.5 -m baselines.run --alg=ppo2 --env=CustomEnv-v0 --network=mlp --num_timesteps=2e7 --save_path=~/models/AntPyBulletEnv-v0_ppo2 --play --agent_number=0
+```
+Видео работы этой версии (после ~20 минут тренировки) - в файле "2019-11-18 15-44-57.flv" в папке "results"<br/>
 
 **TODO:**
 (1) Хочется попробовать то же на HER (hindsight experience replay).<br/>
