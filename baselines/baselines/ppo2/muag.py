@@ -60,10 +60,10 @@ def muag_change_actions(actions, cur_step, agent_number, curr_directory):
             for finame in ['active_process.txt', 'actions_agent1.pkl', 'actions_agent2.pkl']:
                 if os.path.isfile(finame):
                     os.remove(finame)
+            if not os.path.isfile('active_process.txt'):
+                with open('active_process.txt', 'w') as file:
+                    file.write('.' * agent_number)  ##agN=1 => '',    agN=2  => '...................<...>.................'
         actions_agentTHIS = {}
-        if not os.path.isfile('active_process.txt'):
-            with open('active_process.txt', 'w') as file:
-                file.write('.' * agent_number)  ##agN=1 => '',    agN=2  => '...................<...>.................'
     else:
         actions_agentTHIS = safe_load_obj(actions_agentTHIS_fname, agent_number = agent_number)  
     actions_agentTHIS[cur_step] = actions
@@ -84,3 +84,10 @@ def muag_change_actions(actions, cur_step, agent_number, curr_directory):
         actions = np.concatenate((actions_agentTHAT[cur_step][:actions_len//2]  ,  actions_agentTHIS[cur_step][actions_len//2:]))
     actions = [actions] ## they were packed as [[...]]
     return actions
+
+def muag_change_values(values, agent_number):
+    if agent_number == 1:
+        values[len(values)//2:] = values[len(values)//2:] * 0
+    if agent_number == 2:
+        values[:len(values)//2] = values[:len(values)//2] * 0
+    return values

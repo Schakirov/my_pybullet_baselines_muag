@@ -39,7 +39,8 @@ class Runner(AbstractEnvRunner):
             self.time_else += self.time1 - self.time2
             print('It took ', self.time_else, ' seconds for everything else')
             if self.agent_number != 0:
-                actions = muag_change_actions(actions, cur_step, self.agent_number, '/home/ai/new5/baselines/baselines/')
+                actions_for_sim = muag_change_actions(actions, cur_step, self.agent_number, '/home/ai/new5/baselines/baselines/')
+                #values = muag_change_values(values, self.agent_number)
             self.time2 = time.time()
             self.time_muag += self.time2 - self.time1
             print('It took ', self.time_muag, ' seconds to modify actions for multiagency')
@@ -52,7 +53,7 @@ class Runner(AbstractEnvRunner):
 
             # Take actions in env and look the results
             # Infos contains a ton of useful informations
-            self.obs[:], rewards, self.dones, infos = self.env.step(actions)
+            self.obs[:], rewards, self.dones, infos = self.env.step(actions_for_sim)
             self.env.render()
             for info in infos:
                 maybeepinfo = info.get('episode')
