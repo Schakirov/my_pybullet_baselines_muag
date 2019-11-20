@@ -40,7 +40,9 @@ class Runner(AbstractEnvRunner):
             print('It took ', self.time_else, ' seconds for everything else')
             if self.agent_number != 0:
                 actions_for_sim = muag_change_actions(actions, cur_step, self.agent_number, '/home/ai/new5/baselines/baselines/')
-                #values = muag_change_values(values, self.agent_number)
+                values = muag_change_values(values, self.agent_number)
+            else:
+                actions_for_sim = actions
             self.time2 = time.time()
             self.time_muag += self.time2 - self.time1
             print('It took ', self.time_muag, ' seconds to modify actions for multiagency')

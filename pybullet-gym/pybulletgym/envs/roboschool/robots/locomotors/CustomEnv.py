@@ -38,6 +38,16 @@ def fit_to_01(arr, indices):
         arr[i] = (0 < arr[i] < 1) * arr[i] + (1 <= arr[i]) * 1
     return arr
 
+def fit_to_circle(arr, indices, xyR):
+    ## xyR is like [x, y, R]  of the circle
+    arr = np.array(arr)
+    for i in indices:
+        r = np.linalg.norm(arr[i] - xyR[:2])
+        if r > xyR[2]:
+            arr[i] = xyR[:2] + (arr[i] - xyR[:2]) * xyR[2] / r
+    return arr
+                
+
 class CustomEnv(gym.Env):
   """Custom Environment that follows gym interface"""
   metadata = {'render.modes': ['human']}
@@ -49,12 +59,14 @@ class CustomEnv(gym.Env):
     # Example when using discrete actions:
     #self.N_DISCRETE_ACTIONS = 5
     #self.action_space = spaces.Discrete(self.N_DISCRETE_ACTIONS)
+    self.agent_num = get_agent_number(sys.argv)
     self.action_space = spaces.Box( np.array([-1,-1,-1,-1]), np.array([+1,+1,+1,+1]) ) ## step_x, step_y,  step_x, step_y
-    self.velocity = 0.01
+    self.velocity_red = 0.01  #escaping agent has higher velocity
+    self.velocity_blue = 0.005
     # Example for using image as input:
     #self.observation_space = spaces.Box(low=0, high=255, shape=(HEIGHT, WIDTH, N_CHANNELS), dtype=np.uint8)
     self.observation_space = spaces.Box( np.array([0,0,-1,0,0,-1]), np.array([+1,+1,+1,+1,+1,+1]) ) ## two coordinates - x, y  and prev_reward - for both agents
-    self.state = np.array([0.25, 0.25, 0,   0.25, 0.25, 0])
+    self.state = np.array([0.25, 0.25, 0,   0.5, 0.5, 0])
     self.prev_state = np.broadcast_to(self.state, (100,) + self.state.shape).copy()
     self.a = Tk()
     self.canv_w = 600
@@ -65,28 +77,34 @@ class CustomEnv(gym.Env):
     self.color_b = 0; self.color_g = 0; self.color_r = 0;
     self.action = 0
     self.text_id = 0
+    self.line_ids = [None] * 10  #length
     self.prev_potential = 0
-    self.agent_num = get_agent_number(sys.argv)
+    self.time_sleep = 0
+    button1 = Button(self.a, text = "speed", command = self.onButton, anchor = W)
+    button1.configure(width = 10, activebackground = "#33B5E5", relief = FLAT)
+    button1_window = self.c.create_window(400, 10, anchor=NW, window=button1)
 
   def step(self, action):
+      na = self.agent_num
       self.action = action
       print('action = ', action)
       print('self.state = ', self.state)
       self.prev_state[:-1, :] = self.prev_state[1:, :]
       self.prev_state[-1, :] = self.state
-      self.state[0] += self.velocity * action[0];   self.state[3] += self.velocity * action[2];   
-      self.state[1] += self.velocity * action[1];   self.state[4] += self.velocity * action[3];   
+      self.state[0] += self.velocity_red * action[0];   self.state[3] += self.velocity_blue * action[2];   
+      self.state[1] += self.velocity_red * action[1];   self.state[4] += self.velocity_blue * action[3];   
       #self.state[0] = self.state[0] % 1;   self.state[3] = self.state[3] % 1;   
       #self.state[1] = self.state[1] % 1;   self.state[4] = self.state[4] % 1;   
       self.state = fit_to_01(self.state, [0,1,3,4])
-      self.potential = np.linalg.norm([self.state[0] - self.state[3], self.state[1] - self.state[4]])
-      self.potential = - np.linalg.norm([self.state[0] - 0.25, self.state[1] - 0.25])
-      self.potential = - abs(self.state[0] - 0.25) - abs(self.state[1] - 0.25)
+      self.state = fit_to_circle(self.state, [[0,1],[3,4]], [0.5, 0.5, 0.5])
+      self.potential = abs(self.state[0] - self.state[3]) + abs(self.state[1] - self.state[4])
+      #self.potential = - np.linalg.norm([self.state[0] - 0.25, self.state[1] - 0.25])
+      #self.potential = - abs(self.state[0] - 0.25) - abs(self.state[1] - 0.25)
       #self.potential = get_distance(self.state[0], self.state[1], self.state[3], self.state[4])
       if self.agent_num == 2:
           self.potential = - self.potential  ## 2nd agent has an opposite goal
-          self.potential = - np.linalg.norm([0.2 - self.state[3], 0.2 - self.state[4]])
-          self.potential = - abs(self.state[3] - 0.2) - abs(self.state[4] - 0.2)
+          #self.potential = - np.linalg.norm([0.2 - self.state[3], 0.2 - self.state[4]])
+          #self.potential = - abs(self.state[3] - 0.2) - abs(self.state[4] - 0.2)
       reward = self.potential - self.prev_potential
       print('reward = ', reward)
       print('potential = ', self.potential)
@@ -97,10 +115,11 @@ class CustomEnv(gym.Env):
       return self.state, reward, done, {}
   
   def reset(self):
-      self.state = np.array([0.25, 0.25, 0,   0.25, 0.25, 0])
+      self.state = np.array([0.25, 0.25, 0,   0.5, 0.5, 0])
       return self.state
 
   def render(self, mode='human', close=False):
+      time.sleep(self.time_sleep)
       '''self.color_r += random.randint(-20,20); self.color_r = self.color_r + (self.color_r < 0) * (0 - self.color_r) + (self.color_r > 255) * (255 - self.color_r)
       self.color_g += random.randint(-20,20); self.color_g = self.color_g + (self.color_g < 0) * (0 - self.color_g) + (self.color_g > 255) * (255 - self.color_g)
       self.color_b += random.randint(-20,20); self.color_b = self.color_b + (self.color_b < 0) * (0 - self.color_b) + (self.color_b > 255) * (255 - self.color_b)
@@ -117,10 +136,19 @@ class CustomEnv(gym.Env):
                 line_id = self.c.create_line(x_prev * self.canv_w, y_prev * self.canv_h, 
                                     x * self.canv_w, y * self.canv_h, width=3, 
                                     fill=colorfill, capstyle=ROUND, smooth=TRUE, splinesteps=36)
-                self.c.after(20, self.c.delete, line_id)
+                #self.c.after(10, self.c.delete, line_id)
+                if self.line_ids[0] != None:
+                    self.c.delete(self.line_ids[0])
+                self.line_ids = self.line_ids[1:] + [line_id]
                 if time.time() % 1 < 0.01:
                     if self.text_id:
                         self.c.delete(self.text_id)
                     self.text_id = self.c.create_text(100,10,fill="darkblue",font="Times 20 italic bold",
                                 text=str(self.action))
       self.a.update()
+
+  def onButton(self):
+      self.time_sleep += 0.05
+      if self.time_sleep > 0.3:
+          self.time_sleep = 0
+      pass
