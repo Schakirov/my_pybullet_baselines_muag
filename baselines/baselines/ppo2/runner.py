@@ -1,7 +1,7 @@
 import numpy as np
 from baselines.common.runners import AbstractEnvRunner
 import time
-from baselines.ppo2.muag import *
+from baselines.ppo2.muag_n import *
 
 class Runner(AbstractEnvRunner):
     """
@@ -39,8 +39,8 @@ class Runner(AbstractEnvRunner):
             self.time_else += self.time1 - self.time2
             print('It took ', self.time_else, ' seconds for everything else')
             if self.agent_number != 0:
-                actions_for_sim = muag_change_actions(actions, cur_step, self.agent_number, '/home/ai/new5/baselines/baselines/')
-                values = muag_change_values(values, self.agent_number)
+                actions_for_sim = muag_change_actions(actions, cur_step, self.agent_number, '/home/ai/new5/baselines/baselines/', 3)
+                values = muag_change_values(values, self.agent_number, 3)
             else:
                 actions_for_sim = actions
             self.time2 = time.time()

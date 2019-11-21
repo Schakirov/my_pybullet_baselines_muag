@@ -60,13 +60,13 @@ class CustomEnv(gym.Env):
     #self.N_DISCRETE_ACTIONS = 5
     #self.action_space = spaces.Discrete(self.N_DISCRETE_ACTIONS)
     self.agent_num = get_agent_number(sys.argv)
-    self.action_space = spaces.Box( np.array([-1,-1,-1,-1,-1,-1]), np.array([+1,+1,+1,+1,+1,+1]) ) ## step_x, step_y,  step_x, step_y
+    self.action_space = spaces.Box( np.array([-1,-1,-1,-1]), np.array([+1,+1,+1,+1]) ) ## step_x, step_y,  step_x, step_y
     self.velocity_red = 0.01  #escaping agent has higher velocity
     self.velocity_blue = 0.005
     # Example for using image as input:
     #self.observation_space = spaces.Box(low=0, high=255, shape=(HEIGHT, WIDTH, N_CHANNELS), dtype=np.uint8)
-    self.observation_space = spaces.Box( np.array([0,0,-1,0,0,-1,0,0,-1]), np.array([+1,+1,+1,+1,+1,+1,1,1,1]) ) ## two coordinates - x, y  and prev_reward - for both agents
-    self.state = np.array([0.25, 0.25, 0,   0.5, 0.5, 0,   0.75, 0.75, 0])
+    self.observation_space = spaces.Box( np.array([0,0,-1,0,0,-1]), np.array([+1,+1,+1,+1,+1,+1]) ) ## two coordinates - x, y  and prev_reward - for both agents
+    self.state = np.array([0.25, 0.25, 0,   0.5, 0.5, 0])
     self.prev_state = np.broadcast_to(self.state, (100,) + self.state.shape).copy()
     self.a = Tk()
     self.canv_w = 600
@@ -91,19 +91,18 @@ class CustomEnv(gym.Env):
       print('self.state = ', self.state)
       self.prev_state[:-1, :] = self.prev_state[1:, :]
       self.prev_state[-1, :] = self.state
-      self.state[0] += self.velocity_red * action[0];   self.state[3] += self.velocity_blue * action[2];   self.state[6] += self.velocity_blue * action[4];   
-      self.state[1] += self.velocity_red * action[1];   self.state[4] += self.velocity_blue * action[3];   self.state[7] += self.velocity_blue * action[5];   
+      self.state[0] += self.velocity_red * action[0];   self.state[3] += self.velocity_blue * action[2];   
+      self.state[1] += self.velocity_red * action[1];   self.state[4] += self.velocity_blue * action[3];   
       #self.state[0] = self.state[0] % 1;   self.state[3] = self.state[3] % 1;   
       #self.state[1] = self.state[1] % 1;   self.state[4] = self.state[4] % 1;   
-      #self.state = fit_to_01(self.state, [0,1,3,4,6,7])
-      self.state = fit_to_circle(self.state, [[0,1],[3,4],[6,7]], [0.5, 0.5, 0.5])
-      self.potential = abs(self.state[0] - self.state[3]) + abs(self.state[1] - self.state[4]) + \
-          abs(self.state[6] - self.state[3]) + abs(self.state[7] - self.state[4])
+      self.state = fit_to_01(self.state, [0,1,3,4])
+      self.state = fit_to_circle(self.state, [[0,1],[3,4]], [0.5, 0.5, 0.5])
+      self.potential = abs(self.state[0] - self.state[3]) + abs(self.state[1] - self.state[4])
       #self.potential = - np.linalg.norm([self.state[0] - 0.25, self.state[1] - 0.25])
       #self.potential = - abs(self.state[0] - 0.25) - abs(self.state[1] - 0.25)
       #self.potential = get_distance(self.state[0], self.state[1], self.state[3], self.state[4])
-      if self.agent_num == 2 or self.agent_num == 3:
-          self.potential = - self.potential  ## 2nd and 3rd agent have an opposite goal
+      if self.agent_num == 2:
+          self.potential = - self.potential  ## 2nd agent has an opposite goal
           #self.potential = - np.linalg.norm([0.2 - self.state[3], 0.2 - self.state[4]])
           #self.potential = - abs(self.state[3] - 0.2) - abs(self.state[4] - 0.2)
       reward = self.potential - self.prev_potential
@@ -116,7 +115,7 @@ class CustomEnv(gym.Env):
       return self.state, reward, done, {}
   
   def reset(self):
-      self.state = np.array([0.25, 0.25, 0,   0.5, 0.5, 0,   0.75, 0.75, 0])
+      self.state = np.array([0.25, 0.25, 0,   0.5, 0.5, 0])
       return self.state
 
   def render(self, mode='human', close=False):
@@ -125,14 +124,14 @@ class CustomEnv(gym.Env):
       self.color_g += random.randint(-20,20); self.color_g = self.color_g + (self.color_g < 0) * (0 - self.color_g) + (self.color_g > 255) * (255 - self.color_g)
       self.color_b += random.randint(-20,20); self.color_b = self.color_b + (self.color_b < 0) * (0 - self.color_b) + (self.color_b > 255) * (255 - self.color_b)
       colorfill = get_rgb(self.color_r, self.color_g, self.color_b)'''
-      for rendering_agent in [1, 2, 3]:
+      for rendering_agent in [1, 2]:
         ra = rendering_agent
         for i in [-1 + len(self.prev_state)]:
             x_prev = self.prev_state[i-1][0+3*(ra-1)];   y_prev = self.prev_state[i-1][1+3*(ra-1)];
             x = self.prev_state[i][0+3*(ra-1)];   y = self.prev_state[i][1+3*(ra-1)];
             if abs(x - x_prev) < 0.05 and abs(y - y_prev) < 0.05:
                 colorfill = 'red'
-                if ra == 2 or ra == 3:
+                if ra == 2:
                     colorfill = 'blue'
                 line_id = self.c.create_line(x_prev * self.canv_w, y_prev * self.canv_h, 
                                     x * self.canv_w, y * self.canv_h, width=3, 
