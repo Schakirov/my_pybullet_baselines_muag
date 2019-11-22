@@ -33,16 +33,22 @@ python3.5 -m baselines.run --alg=ppo2 --env=HumanoidPyBulletEnv-v0 --network=mlp
 (2) CustomEnv лежит в pybulletgym/envs/roboschool/robots/locomotors/<br/>
 
 **Особенности последней версии по сравнению с прошлой:**
-Красный агент убегает от двух синих. Все агенты вполне обучаются. Движения агентов ограничены кругом. Скорость красного агента выше в 2 раза.<br/>
+Красный агент убегает от зеленого, зеленый от синего, а синий от красного..<br/>
+Результаты: results/2019-11-22 16-19-10.flv, после ~1 часа тренировки. Агенты не идеальны, но в целом видно, что более-менее обучились.<br/>
 Конкретно эта версия запускалась командой:<br/>
 ```
 python3.5 -m baselines.run --alg=ppo2 --env=CustomEnv-v0 --network=mlp --num_timesteps=2e7 --save_path=~/models/AntPyBulletEnv-v0_ppo2 --play --agent_number=1
 python3.5 -m baselines.run --alg=ppo2 --env=CustomEnv-v0 --network=mlp --num_timesteps=2e7 --save_path=~/models/AntPyBulletEnv-v0_ppo2 --play --agent_number=2
 python3.5 -m baselines.run --alg=ppo2 --env=CustomEnv-v0 --network=mlp --num_timesteps=2e7 --save_path=~/models/AntPyBulletEnv-v0_ppo2 --play --agent_number=3
 ```
-Результаты лежат в файле results/2019-11-21 13-44-09.flv<br/>
 Используется моя новая реализация мультиагентности для N агентов  ppo2/muag_n.py  (вместо моей для двух агентов ppo2/muag.py)
 
 **TODO:**
 (1) Хочется попробовать то же на HER (hindsight experience replay).<br/>
 В HER особенная структура возвращаемого obs:  это dictionary с ключами 'obs', 'desired' (goal) итп.
+(2) Чтобы агент видел то, что в каком-нибудь симулированном мире комнаты видит агент, находящийся в его точке
+(и надо будет ввести направление взгляда конечно еще)
+(3) Попробовать несколько агентов на разных timescale.
+Скажем, синий агент выдает указания красному в виде точки, куда двигаться. Раз в сто шагов.
+Красный агент награждается просто за передвижение к этой точке.
+Синий агент награждается за то, что в контрольные моменты времени красный агент оказывается 

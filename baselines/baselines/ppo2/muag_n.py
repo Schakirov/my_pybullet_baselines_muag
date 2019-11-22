@@ -122,10 +122,8 @@ def muag_change_actions_stupid(actions, cur_step, agent_number, curr_directory, 
     return actions'''
 
 def muag_change_actions(actions, cur_step, agent_number, curr_directory, max_agents):
-    print('0000')
     actions = actions[0] ## they are packed as [[...]]
     actions_agents_fname = os.path.join(curr_directory, 'actions_agents.pkl')
-    print('000--11')
     if cur_step == 0 and agent_number == 1:
             for finame in ['active_process.txt', 'actions_agents.pkl']:
                 if os.path.isfile(finame):
@@ -136,16 +134,11 @@ def muag_change_actions(actions, cur_step, agent_number, curr_directory, max_age
             actions_agents = {}
     else:
         actions_agents = safe_load_obj(actions_agents_fname, agent_number, max_agents)
-    print('000-12')
     if cur_step == 0:
         if agent_number not in actions_agents.keys():
             actions_agents[agent_number] = {}
-    print('000-13')
     actions_agents[agent_number][cur_step] = actions
-    print('actions_agents = ', actions_agents)
-    print('11111')
     safe_loadADDsave_obj(actions_agents_fname, agent_number, cur_step, actions, max_agents, 'active_process.txt')
-    print('22222')
     synch_success = 0
     while not synch_success:
         if os.path.isfile(actions_agents_fname):

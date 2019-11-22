@@ -26,26 +26,17 @@ class Runner(AbstractEnvRunner):
         mb_states = self.states
         epinfos = []
         # For n in range number of steps
-        self.time2 = time.time()
-        self.time_muag = 0
-        self.time_else = 0
         for cur_step in range(self.nsteps):
             # Given observations, get action value and neglopacs
             # We already have self.obs because Runner superclass run self.obs[:] = env.reset() on init
             actions, values, self.states, neglogpacs = self.model.step(self.obs, S=self.states, M=self.dones)
-            print('actions = ', actions)
-            print('cur_step = ', cur_step, ',  agent_number = ', self.agent_number)
-            self.time1 = time.time()
-            self.time_else += self.time1 - self.time2
-            print('It took ', self.time_else, ' seconds for everything else')
+            
+            ## THE ONLY INSERT FOR MULTIAGENCY  (and 1 line in import... and 1 line in __init__)
             if self.agent_number != 0:
                 actions_for_sim = muag_change_actions(actions, cur_step, self.agent_number, '/home/ai/new5/baselines/baselines/', 3)
                 values = muag_change_values(values, self.agent_number, 3)
             else:
                 actions_for_sim = actions
-            self.time2 = time.time()
-            self.time_muag += self.time2 - self.time1
-            print('It took ', self.time_muag, ' seconds to modify actions for multiagency')
             
             mb_obs.append(self.obs.copy())
             mb_actions.append(actions)

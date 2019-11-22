@@ -33,6 +33,14 @@ def get_distance(x1, y1, x2, y2):
     d = np.linalg.norm([1 - abs(x2 - x1), 1 - abs(y2 - y1)])
     return min(a,b,c,d)
 
+def get_distance2(arr):
+    ## arr = [x1, y1, x2, y2]
+    return abs(arr[0] - arr[2]) + abs(arr[1] - arr[3])
+
+def get_distance3(arr):
+    ## arr = [x1, y1, x2, y2]
+    return np.linalg.norm([arr[0] - arr[2], arr[1] - arr[3]])
+
 def fit_to_01(arr, indices):
     for i in indices:
         arr[i] = (0 < arr[i] < 1) * arr[i] + (1 <= arr[i]) * 1
@@ -61,7 +69,7 @@ class CustomEnv(gym.Env):
     #self.action_space = spaces.Discrete(self.N_DISCRETE_ACTIONS)
     self.agent_num = get_agent_number(sys.argv)
     self.action_space = spaces.Box( np.array([-1,-1,-1,-1,-1,-1]), np.array([+1,+1,+1,+1,+1,+1]) ) ## step_x, step_y,  step_x, step_y
-    self.velocity_red = 0.01  #escaping agent has higher velocity
+    self.velocity_red = 0.005  #escaping agent has higher velocity
     self.velocity_blue = 0.005
     # Example for using image as input:
     #self.observation_space = spaces.Box(low=0, high=255, shape=(HEIGHT, WIDTH, N_CHANNELS), dtype=np.uint8)
@@ -97,20 +105,21 @@ class CustomEnv(gym.Env):
       #self.state[1] = self.state[1] % 1;   self.state[4] = self.state[4] % 1;   
       #self.state = fit_to_01(self.state, [0,1,3,4,6,7])
       self.state = fit_to_circle(self.state, [[0,1],[3,4],[6,7]], [0.5, 0.5, 0.5])
-      self.potential = abs(self.state[0] - self.state[3]) + abs(self.state[1] - self.state[4]) + \
-          abs(self.state[6] - self.state[3]) + abs(self.state[7] - self.state[4])
-      #self.potential = - np.linalg.norm([self.state[0] - 0.25, self.state[1] - 0.25])
-      #self.potential = - abs(self.state[0] - 0.25) - abs(self.state[1] - 0.25)
-      #self.potential = get_distance(self.state[0], self.state[1], self.state[3], self.state[4])
-      if self.agent_num == 2 or self.agent_num == 3:
-          self.potential = - self.potential  ## 2nd and 3rd agent have an opposite goal
-          #self.potential = - np.linalg.norm([0.2 - self.state[3], 0.2 - self.state[4]])
-          #self.potential = - abs(self.state[3] - 0.2) - abs(self.state[4] - 0.2)
+      ## green => red => blue => green
+      if self.agent_num == 1:
+          self.potential = 1.5 * get_distance2(self.state[[0,1,3,4]]) - \
+              get_distance2(self.state[[0,1,6,7]])
+      if self.agent_num == 2:
+          self.potential = 1.5 * get_distance2(self.state[[3,4,6,7]]) - \
+              get_distance2(self.state[[3,4,0,1]])
+      if self.agent_num == 3:
+          self.potential = 1.5 * get_distance2(self.state[[6,7,0,1]]) - \
+              get_distance2(self.state[[6,7,3,4]])
+      
       reward = self.potential - self.prev_potential
       print('reward = ', reward)
       print('potential = ', self.potential)
       self.prev_potential = self.potential
-      #reward = - abs(4 - action)
       self.state[2] = (reward < -1) * -1 + (-1 <= reward <=1) * reward + (1 < reward) * 1
       done = 0
       return self.state, reward, done, {}
@@ -132,7 +141,9 @@ class CustomEnv(gym.Env):
             x = self.prev_state[i][0+3*(ra-1)];   y = self.prev_state[i][1+3*(ra-1)];
             if abs(x - x_prev) < 0.05 and abs(y - y_prev) < 0.05:
                 colorfill = 'red'
-                if ra == 2 or ra == 3:
+                if ra == 2:
+                    colorfill = 'green'
+                if ra == 3:
                     colorfill = 'blue'
                 line_id = self.c.create_line(x_prev * self.canv_w, y_prev * self.canv_h, 
                                     x * self.canv_w, y * self.canv_h, width=3, 
