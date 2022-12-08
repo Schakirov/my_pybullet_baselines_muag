@@ -2,7 +2,7 @@ absl-py==0.8.1
 astor==0.8.0
 atari-py==0.2.6
 -e git+https://github.com/Schakirov/my_pybullet_baselines_muag.git@9983d60476f5e73077969e4b51a07b72addced2d#egg=baselines&subdirectory=baselines
-certifi==2019.9.11
+certifi==2022.12.7
 chardet==3.0.4
 Click==7.0
 cloudpickle==1.2.2
